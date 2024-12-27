@@ -16,7 +16,6 @@ yolo_model = YOLO('Yolov9c(100)lr0.01.pt')
 # Load the TensorFlow model
 tensorflow_model = tf.keras.models.load_model(r'Adam100Batch32setv2lr0.001.h5')
 
-# Prepare the image for TensorFlow model
 def prepareImage(image):
     image = tf.image.resize(image, [224, 224])
     imgResult = img_to_array(image)
@@ -24,7 +23,6 @@ def prepareImage(image):
     imgResult = imgResult / 255. 
     return imgResult
 
-# Save image to directory
 def save_image_to_directory(img, filename, save_directory, num_boxes):
     if save_directory:
         os.makedirs(save_directory, exist_ok=True)
@@ -100,7 +98,7 @@ def predict(img, filename, i):
         return(4)
 
 
-# Streamlit UI for image upload and display
+# Streamlit UI 
 st.title("Image Processing with YOLO and TensorFlow Models")
 
 option = st.radio("Select input method:", ("Upload Image", "Use Webcam"))
