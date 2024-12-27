@@ -8,7 +8,7 @@ import cv2
 from ultralytics import YOLO
 import time
 import shutil
-import pandas as pd  # for handling tabular data
+import pandas as pd  
 
 # Load YOLO model
 yolo_model = YOLO('Yolov9c(100)lr0.01.pt')
@@ -21,7 +21,7 @@ def prepareImage(image):
     image = tf.image.resize(image, [224, 224])
     imgResult = img_to_array(image)
     imgResult = np.expand_dims(imgResult, axis=0)
-    imgResult = imgResult / 255.  # Normalize the image
+    imgResult = imgResult / 255. 
     return imgResult
 
 # Save image to directory
@@ -35,16 +35,14 @@ def save_image_to_directory(img, filename, save_directory, num_boxes):
         st.write(f"Bounding box count {num_boxes} is not handled.")
 def update_vehicle_count(vehicle_class):
     if 'vehicle_counts' not in st.session_state:
-        st.session_state.vehicle_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}  # Initialize counts if not set
+        st.session_state.vehicle_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}  
     
-    # Increment the count for the detected class
+    
     if vehicle_class in st.session_state.vehicle_counts:
         st.session_state.vehicle_counts[vehicle_class] += 1
 
 
-# Function to process image
 def predict(img, filename, i):
-    # Convert the TensorFlow tensor to a NumPy array
     img_np = img.numpy()
     img_np = np.squeeze(img_np)
 
@@ -73,7 +71,7 @@ def predict(img, filename, i):
         answer = np.argmax(resultArray, axis=1)
         if answer is not None:
             index = answer[0]
-            update_vehicle_count(index+1)  # Update the count for the detected class
+            update_vehicle_count(index+1)  
             return index
     elif num_boxes == 1:
         imgres = prepareImage(img)
@@ -81,7 +79,7 @@ def predict(img, filename, i):
         answer = np.argmax(resultArray, axis=1)
         if answer is not None:
             index = answer[0]
-            update_vehicle_count(index+1)  # Update the count for the detected class
+            update_vehicle_count(index+1)  
             return index
     elif num_boxes == 2:
         imgres = prepareImage(img)
@@ -89,16 +87,16 @@ def predict(img, filename, i):
         answer = np.argmax(resultArray, axis=1)
         if answer is not None:
             index = answer[0]
-            update_vehicle_count(index+1)  # Update the count for the detected class
+            update_vehicle_count(index+1)  
             return index
     elif num_boxes == 3:
-        update_vehicle_count(3)  # Update the count for the detected class
+        update_vehicle_count(3) 
         return(2)
     elif num_boxes == 4:
-        update_vehicle_count(4)  # Update the count for the detected class
+        update_vehicle_count(4)  
         return(3)
     elif num_boxes >= 5:
-        update_vehicle_count(5)  # Update the count for the detected class
+        update_vehicle_count(5) 
         return(4)
 
 
@@ -111,54 +109,39 @@ if option == "Upload Image":
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Load image
         image = tf.image.decode_image(uploaded_file.read(), channels=3)
 
-        # Convert the tensor to a NumPy array and then to a PIL Image
         image_np = image.numpy()
         image_pil = Image.fromarray(image_np)
 
-        # Display image
         st.image(image_pil, caption="Uploaded Image", use_column_width=True)
         st.write("")
-        
-        # Process the image
+
         if st.button("Process Image"):
-            # Run the prediction function
             result = predict(image, uploaded_file.name, 0)
-            
-            # Display result
+
             st.write(f"Processed image, result: Class {result+1}")
 
 elif option == "Use Webcam":
     image_file = st.camera_input("Take a picture")
 
     if image_file is not None:
-        # Load image from webcam
         image = tf.image.decode_image(image_file.getvalue(), channels=3)
 
-        # Convert the tensor to a NumPy array and then to a PIL Image
         image_np = image.numpy()
         image_pil = Image.fromarray(image_np)
 
-        # Display image
         st.image(image_pil, caption="Captured Image", use_column_width=True)
         st.write("")
-
-        # Process the image
+        
         if st.button("Process Image"):
-            # Run the prediction function
             result = predict(image, "captured_image.jpg", 0)
-            
-            # Display result
+
             st.write(f"Processed image, result: Class {result+1}")
 
 if 'vehicle_counts' in st.session_state:
     st.write("### Detected Vehicle Counts")
-    # Membuat DataFrame dari dictionary `vehicle_counts`
     df_counts = pd.DataFrame(list(st.session_state.vehicle_counts.items()), columns=['Class', 'Total Detections'])
-    
-    # Menampilkan tabel langsung menggunakan st.table()
     st.table(df_counts)
 
 
